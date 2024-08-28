@@ -7,3 +7,4 @@ src/font/*.inc
 convimg.out
 nul.d
 src/gfx/convimg.yaml.lst
+extras/
