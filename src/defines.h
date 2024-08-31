@@ -42,12 +42,12 @@ typedef struct midistreaming_interface_header {
 } midistreaming_interface_header_t;
 
 typedef struct midistreaming_in_descriptor {
-    uint8_t bLength;                
-    uint8_t bDescriptorType;       
-    uint8_t bDescriptorSubtype;     
-    uint8_t bJackType;              
-    uint8_t bJackID;               
-    uint8_t iJack;                   
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint8_t bDescriptorSubtype;
+    uint8_t bJackType;
+    uint8_t bJackID;
+    uint8_t iJack;
 } midistreaming_in_descriptor_t;
 
 typedef struct midistreaming_out_descriptor {
@@ -61,6 +61,14 @@ typedef struct midistreaming_out_descriptor {
     uint8_t BaSourcePin;
     uint8_t iJack;
 } midistreaming_out_descriptor_t;
+
+typedef struct midistreaming_endpoint_descriptor {
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint8_t bDescriptorSubtype;
+    uint8_t bNumEmbMIDIJack;
+    uint8_t baAssocJackID;
+} midistreaming_endpoint_descriptor_t;
 
 #ifdef __cplusplus
 }

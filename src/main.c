@@ -29,7 +29,8 @@ static const usb_string_descriptor_t product_name = {
 
 static const usb_string_descriptor_t *strings[] = { &product_name };
 static const usb_string_descriptor_t langids = {
-    .bLength = sizeof(langids),
+    // .bLength = sizeof(langids),
+    .bLength = 4,
     .bDescriptorType = USB_STRING_DESCRIPTOR,
     .bString = {
         [0] = DEFAULT_LANGID,
@@ -44,7 +45,10 @@ static struct {
     midistreaming_interface_header_t midi_header;
     midistreaming_in_descriptor_t midi_in[2];
     midistreaming_out_descriptor_t midi_out[2];
-    usb_endpoint_descriptor_t endpoints[2];
+    usb_endpoint_descriptor_t endpoint0;
+    midistreaming_endpoint_descriptor_t midi_endpoint0;
+    usb_endpoint_descriptor_t endpoint1;
+    midistreaming_endpoint_descriptor_t midi_endpoint1;
 } configuration1 = {
     .configuration = {
         .bLength = sizeof(configuration1.configuration),
@@ -138,27 +142,39 @@ static struct {
             .iJack = 0x00, // Optional string index
         },
     },
-    .endpoints = {
-        [0] = {
-            .bLength = sizeof(configuration1.endpoints[0]),
-            .bDescriptorType = USB_ENDPOINT_DESCRIPTOR,
-            .bEndpointAddress = USB_HOST_TO_DEVICE | 1,
-            .bmAttributes = USB_BULK_TRANSFER,
-            .wMaxPacketSize = 0x20, // 1x 32 bytes
-            .bInterval = 0,
-            //.bRefresh = 0,      (Likely unused)
-            //.bSynchAddress = 0,
-        },
-        [1] = {
-            .bLength = sizeof(configuration1.endpoints[1]),
-            .bDescriptorType = USB_ENDPOINT_DESCRIPTOR,
-            .bEndpointAddress = USB_DEVICE_TO_HOST | 1,
-            .bmAttributes = USB_BULK_TRANSFER,
-            .wMaxPacketSize = 0x20, // 1x 32 bytes
-            .bInterval = 0,
-            // .bRefresh = 0,      (Likely unused)
-            // .bSynchAddress = 0,
-        },
+    .endpoint0 = {
+        .bLength = sizeof(configuration1.endpoint0),
+        .bDescriptorType = USB_ENDPOINT_DESCRIPTOR,
+        .bEndpointAddress = USB_HOST_TO_DEVICE | 1,
+        .bmAttributes = USB_BULK_TRANSFER,
+        .wMaxPacketSize = 0x20, // 1x 32 bytes
+        .bInterval = 0,
+        //.bRefresh = 0,      (Likely unused)
+        //.bSynchAddress = 0,
+    },
+    .midi_endpoint0 = {
+        .bLength = sizeof(configuration1.midi_endpoint0),
+        .bDescriptorType = 0x25, // Audio class endpoint
+        .bDescriptorSubtype = 0x01, // General Descriptor
+        .bNumEmbMIDIJack = 1,
+        .baAssocJackID = 3,
+    },
+    .endpoint1 = {
+        .bLength = sizeof(configuration1.endpoint1),
+        .bDescriptorType = USB_ENDPOINT_DESCRIPTOR,
+        .bEndpointAddress = USB_DEVICE_TO_HOST | 1,
+        .bmAttributes = USB_BULK_TRANSFER,
+        .wMaxPacketSize = 0x20, // 1x 32 bytes
+        .bInterval = 0,
+        // .bRefresh = 0,      (Likely unused)
+        // .bSynchAddress = 0,
+    },
+    .midi_endpoint1 = {
+        .bLength = sizeof(configuration1.midi_endpoint1),
+        .bDescriptorType = 0x25, // Audio class endpoint
+        .bDescriptorSubtype = 0x01, // General Descriptor
+        .bNumEmbMIDIJack = 1,
+        .baAssocJackID = 1,
     },
 };
 
@@ -175,7 +191,7 @@ static const usb_device_descriptor_t device = {
     .bDeviceProtocol = 0,
     .bMaxPacketSize0 = 0x40,
     .idVendor = 0x1963, // IK Multimedia
-    .idProduct = 0x001F, // Unknown?
+    .idProduct = 0x001F, // Unknown? (iRig Keys Mini)
     .bcdDevice = 0x0101,
     .iManufacturer = 5,
     .iProduct = 9,
