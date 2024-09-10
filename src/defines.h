@@ -70,6 +70,52 @@ typedef struct midistreaming_endpoint_descriptor {
     uint8_t baAssocJackID;
 } midistreaming_endpoint_descriptor_t;
 
+/**
+ * @brief MIDI Event Cable Numbers
+ * 
+ */
+enum {
+    MIDI_CABLE0,
+    MIDI_CABLE1,
+    MIDI_CABLE2,
+    MIDI_CABLE3,
+    MIDI_CABLE4,
+    MIDI_CABLE5,
+    MIDI_CABLE6,
+    MIDI_CABLE7,
+    MIDI_CABLE8,
+    MIDI_CABLE9,
+    MIDI_CABLE10,
+    MIDI_CABLE11,
+    MIDI_CABLE12,
+    MIDI_CABLE13,
+    MIDI_CABLE14,
+    MIDI_CABLE15
+};
+
+/**
+ * @brief MIDI Event Code Index Numbers
+ * 
+ */
+enum {
+    MIDI_MISC_EVENT,
+    MIDI_CABLE_EVENT,
+    MIDI_SYSTEM_2BYTE,
+    MIDI_SYSTEM_3BYTE,
+    MIDI_SYSEX_STARTS,
+    MIDI_SYSTEM_1BYTE,
+    MIDI_SYSEX_ENDS_2BYTE,
+    MIDI_SYSEX_ENDS_3BYTE,
+    MIDI_NOTE_OFF,
+    MIDI_NOTE_ON,
+    MIDI_POLY_KEYPRESS,
+    MIDI_CONTROL_CHANGE,
+    MIDI_PROGRAM_CHANGE,
+    MIDI_CHANNEL_PRESSURE,
+    MIDI_PITCHBEND_CHANGE,
+    MIDI_SINGLE_BYTE
+};
+
 #ifdef __cplusplus
 }
 #endif
