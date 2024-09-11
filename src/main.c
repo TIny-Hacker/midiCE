@@ -250,7 +250,7 @@ int main(void) {
                 midiEvent[2] = 69; // A4
                 midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
 
-                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_HOST_TO_DEVICE | 1), &midiEvent, 4, NULL, NULL)) {
+                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
                     note = false;
                 }
             } else if (kb_AnyKey() && !note) {
@@ -260,7 +260,7 @@ int main(void) {
                 midiEvent[2] = 69;
                 midiEvent[3] = 0x7F;
 
-                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_HOST_TO_DEVICE | 1), &midiEvent, 4, NULL, NULL)) {
+                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
                     note = true;
                 }
             }
