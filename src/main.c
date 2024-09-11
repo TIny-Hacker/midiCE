@@ -62,7 +62,7 @@ static struct {
         .wTotalLength = sizeof(configuration1),
         .bNumInterfaces = 2,
         .bConfigurationValue = 1,
-        .iConfiguration = 0,
+        .iConfiguration = 1,
         .bmAttributes = USB_BUS_POWERED | USB_NO_REMOTE_WAKEUP,
         .bMaxPower = 500 / 2,
     },
@@ -250,7 +250,7 @@ int main(void) {
                 midiEvent[2] = 69; // A4
                 midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
 
-                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), 0x81), &midiEvent, 4, NULL, NULL)) {
+                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_HOST_TO_DEVICE | 1), &midiEvent, 4, NULL, NULL)) {
                     note = false;
                 }
             } else if (kb_AnyKey() && !note) {
@@ -260,7 +260,7 @@ int main(void) {
                 midiEvent[2] = 69;
                 midiEvent[3] = 0x7F;
 
-                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), 0x81), &midiEvent, 4, NULL, NULL)) {
+                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_HOST_TO_DEVICE | 1), &midiEvent, 4, NULL, NULL)) {
                     note = true;
                 }
             }
