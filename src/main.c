@@ -33,7 +33,19 @@ static const usb_string_descriptor_t manufacturer = {
     .bString = L"TIny_Hacker",
 };
 
-static const usb_string_descriptor_t *strings[] = { &product_name, &manufacturer };
+static const usb_string_descriptor_t serial = {
+    .bLength = sizeof(manufacturer) + 2,
+    .bDescriptorType = USB_STRING_DESCRIPTOR,
+    .bString = L"0",
+};
+
+static const usb_string_descriptor_t jack = {
+    .bLength = sizeof(manufacturer) + 12,
+    .bDescriptorType = USB_STRING_DESCRIPTOR,
+    .bString = L"Output",
+};
+
+static const usb_string_descriptor_t *strings[] = { &product_name, &manufacturer, &serial, &jack };
 static const usb_string_descriptor_t langids = {
     // .bLength = sizeof(langids),
     .bLength = 4,
@@ -45,16 +57,15 @@ static const usb_string_descriptor_t langids = {
 
 static struct {
     usb_configuration_descriptor_t configuration;
+    usb_interface_association_descriptor_t interface_association;
     usb_interface_descriptor_t interface0;
     audio_control_interface_header_t audio_header;
     usb_interface_descriptor_t interface1;
     midistreaming_interface_header_t midi_header;
-    midistreaming_in_descriptor_t midi_in[2];
-    midistreaming_out_descriptor_t midi_out[2];
-    usb_endpoint_descriptor_t endpoint0;
-    midistreaming_endpoint_descriptor_t midi_endpoint0;
-    usb_endpoint_descriptor_t endpoint1;
-    midistreaming_endpoint_descriptor_t midi_endpoint1;
+    midistreaming_in_descriptor_t midi_in;
+    midistreaming_out_descriptor_t midi_out;
+    usb_endpoint_descriptor_t endpoint;
+    midistreaming_endpoint_descriptor_t midi_endpoint;
 } configuration1 = {
     .configuration = {
         .bLength = sizeof(configuration1.configuration),
@@ -65,6 +76,16 @@ static struct {
         .iConfiguration = 1,
         .bmAttributes = USB_BUS_POWERED | USB_NO_REMOTE_WAKEUP,
         .bMaxPower = 500 / 2,
+    },
+    .interface_association = {
+        .bLength = sizeof(configuration1.interface_association),
+        .bDescriptorType = 0x0B,
+        .bFirstInterface = 0,
+        .bInterfaceCount = 2,
+        .bFunctionClass = 0x01,
+        .bFunctionSubClass = 0x03,
+        .bFunctionProtocol = 0,
+        .iFunction = 0,
     },
     .interface0 = {
         .bLength = sizeof(configuration1.interface0),
@@ -91,11 +112,11 @@ static struct {
         .bDescriptorType = USB_INTERFACE_DESCRIPTOR,
         .bInterfaceNumber = 1,
         .bAlternateSetting = 0,
-        .bNumEndpoints = 2,
+        .bNumEndpoints = 1,
         .bInterfaceClass = USB_AUDIO_CLASS,
         .bInterfaceSubClass = 0x03, // MIDI Streaming
         .bInterfaceProtocol = 0, // Unused
-        .iInterface = 0, // Optional string index
+        .iInterface = 2, // Optional string index
     },
     .midi_header = {
         .bLength = sizeof(configuration1.midi_header),
@@ -104,83 +125,43 @@ static struct {
         .version = 0x0100,
         .wTotalLength = sizeof(configuration1.midi_header) + 
                         sizeof(configuration1.midi_in) +
-                        sizeof(configuration1.midi_out), // TODO, add together sizes of all MIDI descriptors
+                        sizeof(configuration1.midi_out),
     },
     .midi_in = {
-        [0] = {
-            .bLength = sizeof(configuration1.midi_in[0]),
-            .bDescriptorType = 0x24, // audio class interface
-            .bDescriptorSubtype = 0x02, // MIDI IN jack descriptor
-            .bJackType = 0x01,
-            .bJackID = 0x01,
-            .iJack = 0x00, // Optional string index
-        },
-        [1] = {
-            .bLength = sizeof(configuration1.midi_in[1]),
-            .bDescriptorType = 0x24, // audio class interface
-            .bDescriptorSubtype = 0x02, // MIDI IN jack descriptor
-            .bJackType = 0x02,
-            .bJackID = 0x02,
-            .iJack = 0x00, // Optional string index
-        },
+        .bLength = sizeof(configuration1.midi_in),
+        .bDescriptorType = 0x24, // audio class interface
+        .bDescriptorSubtype = 0x02, // MIDI IN jack descriptor
+        .bJackType = 0x02,
+        .bJackID = 0x02,
+        .iJack = 0x04, // Optional string index
     },
     .midi_out = {
-        [0] = {
-            .bLength = sizeof(configuration1.midi_out[0]),
-            .bDescriptorType = 0x24, // audio class interface
-            .bDescriptorSubtype = 0x03, // MIDI OUT jack descriptor
-            .bJackType = 0x01,
-            .bJackID = 0x03,
-            .bNrInputPins = 0x01,
-            .baSourceID = 0x02,
-            .BaSourcePin = 0x01,
-            .iJack = 0x00, // Optional string index
-        },
-        [1] = {
-            .bLength = sizeof(configuration1.midi_out[1]),
-            .bDescriptorType = 0x24, // audio class interface
-            .bDescriptorSubtype = 0x03, // MIDI OUT jack descriptor
-            .bJackType = 0x02,
-            .bJackID = 0x04,
-            .bNrInputPins = 0x01,
-            .baSourceID = 0x01,
-            .BaSourcePin = 0x01,
-            .iJack = 0x00, // Optional string index
-        },
+        .bLength = sizeof(configuration1.midi_out),
+        .bDescriptorType = 0x24, // audio class interface
+        .bDescriptorSubtype = 0x03, // MIDI OUT jack descriptor
+        .bJackType = 0x01,
+        .bJackID = 0x12,
+        .bNrInputPins = 0x01,
+        .baSourceID = 0x12,
+        .baSourcePin = 0x01,
+        .iJack = 0x04, // Optional string index
     },
-    .endpoint0 = {
-        .bLength = sizeof(configuration1.endpoint0),
+    .endpoint = {
+        .bLength = sizeof(configuration1.endpoint),
         .bDescriptorType = USB_ENDPOINT_DESCRIPTOR,
-        .bEndpointAddress = USB_HOST_TO_DEVICE | 1,
+        .bEndpointAddress = USB_DEVICE_TO_HOST | 1,
         .bmAttributes = USB_BULK_TRANSFER,
-        .wMaxPacketSize = 0x20, // 1x 32 bytes
+        .wMaxPacketSize = 0x40,
         .bInterval = 0,
         //.bRefresh = 0,      (Likely unused)
         //.bSynchAddress = 0,
     },
-    .midi_endpoint0 = {
-        .bLength = sizeof(configuration1.midi_endpoint0),
+    .midi_endpoint = {
+        .bLength = sizeof(configuration1.midi_endpoint),
         .bDescriptorType = 0x25, // Audio class endpoint
         .bDescriptorSubtype = 0x01, // General Descriptor
         .bNumEmbMIDIJack = 1,
-        .baAssocJackID = 3,
-    },
-    .endpoint1 = {
-        .bLength = sizeof(configuration1.endpoint1),
-        .bDescriptorType = USB_ENDPOINT_DESCRIPTOR,
-        .bEndpointAddress = USB_DEVICE_TO_HOST | 1,
-        .bmAttributes = USB_BULK_TRANSFER,
-        .wMaxPacketSize = 0x20, // 1x 32 bytes
-        .bInterval = 0,
-        // .bRefresh = 0,      (Likely unused)
-        // .bSynchAddress = 0,
-    },
-    .midi_endpoint1 = {
-        .bLength = sizeof(configuration1.midi_endpoint1),
-        .bDescriptorType = 0x25, // Audio class endpoint
-        .bDescriptorSubtype = 0x01, // General Descriptor
-        .bNumEmbMIDIJack = 1,
-        .baAssocJackID = 1,
+        .baAssocJackID = 0x12, // midi_out jack
     },
 };
 
@@ -200,10 +181,10 @@ static const usb_device_descriptor_t device = {
     .idProduct = 0x1337,
     // .idVendor = 0x1963, // IK Multimedia
     // .idProduct = 0x001F, // Unknown? (iRig Keys Mini)
-    .bcdDevice = 0x0101,
+    .bcdDevice = 0x0100,
     .iManufacturer = 2,
     .iProduct = 1,
-    .iSerialNumber = 0,
+    .iSerialNumber = 3,
     .bNumConfigurations = sizeof(configurations) / sizeof(*configurations),
 };
 

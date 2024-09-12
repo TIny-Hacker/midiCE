@@ -23,6 +23,17 @@ extern "C" {
 
 // Custom struct definitions
 
+typedef struct usb_interface_association_descriptor {
+    uint8_t bLength;
+    uint8_t bDescriptorType;
+    uint8_t bFirstInterface;
+    uint8_t bInterfaceCount;
+    uint8_t bFunctionClass;
+    uint8_t bFunctionSubClass;
+    uint8_t bFunctionProtocol;
+    uint8_t iFunction;
+} usb_interface_association_descriptor_t;
+
 typedef struct audio_control_interface_header {
     uint8_t  bLength;
     uint8_t  bDescriptorType;
@@ -58,7 +69,7 @@ typedef struct midistreaming_out_descriptor {
     uint8_t bJackID;
     uint8_t bNrInputPins;
     uint8_t baSourceID;
-    uint8_t BaSourcePin;
+    uint8_t baSourcePin;
     uint8_t iJack;
 } midistreaming_out_descriptor_t;
 
