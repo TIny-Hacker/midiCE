@@ -217,6 +217,9 @@ int main(void) {
     bool note = false;
     static uint8_t midiEvent[4];
 
+    uint16_t pitchbend = DEFAULT_PITCHBEND;
+    bool pitchUpdate = false;
+
     gfx_Begin();
 
     if ((error = usb_Init(handleUsbEvent, NULL, &standard, USB_DEFAULT_INIT_FLAGS)) == USB_SUCCESS) {
@@ -225,7 +228,52 @@ int main(void) {
             kb_Scan();
             usb_HandleEvents();
 
-            if (!kb_AnyKey() && note) {
+            if (kb_IsDown(kb_KeyLeft) && pitchbend) {
+                if (pitchbend > MOD_PITCHBEND) { // Ensure that the pitchbend value stays within range
+                    pitchbend -= MOD_PITCHBEND;
+                } else {
+                    pitchbend = MIN_PITCHBEND;
+                }
+
+                pitchUpdate = true;
+            } else if (kb_IsDown(kb_KeyRight) && pitchbend < MAX_PITCHBEND) {
+                if (pitchbend < MAX_PITCHBEND - MOD_PITCHBEND) {
+                    pitchbend += MOD_PITCHBEND;
+                } else {
+                    pitchbend = MAX_PITCHBEND;
+                }
+
+                pitchUpdate = true;
+            } else if (pitchbend < DEFAULT_PITCHBEND) { // Correct pitch bend if keys are released
+                if (pitchbend + CORRECT_PITCHBEND < DEFAULT_PITCHBEND) {
+                    pitchbend += CORRECT_PITCHBEND;
+                } else {
+                    pitchbend = DEFAULT_PITCHBEND;
+                }
+
+                pitchUpdate = true;
+            } else if (pitchbend > DEFAULT_PITCHBEND) {
+                if (pitchbend - CORRECT_PITCHBEND > DEFAULT_PITCHBEND) {
+                    pitchbend -= CORRECT_PITCHBEND;
+                } else {
+                    pitchbend = DEFAULT_PITCHBEND;
+                }
+
+                pitchUpdate = true;
+            }
+
+            if (pitchUpdate) {
+                midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_PITCHBEND_CHANGE;
+                midiEvent[1] = MIDI_PITCHBEND_CHANGE << 4;
+                midiEvent[2] = low(pitchbend << 1) >> 1; // Split 16 bit number into two 7 bit numbers, since MIDI needs the most significant bit clear
+                midiEvent[3] = high(pitchbend << 1);
+
+                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
+                    pitchUpdate = false;
+                }
+            }
+
+            if (!kb_IsDown(kb_Key8) && note) {
                 midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_OFF;
                 midiEvent[1] = MIDI_NOTE_OFF << 4;
                 midiEvent[2] = 69; // A4
@@ -234,7 +282,7 @@ int main(void) {
                 if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
                     note = false;
                 }
-            } else if (kb_AnyKey() && !note) {
+            } else if (kb_IsDown(kb_Key8) && !note) {
                 gfx_ZeroScreen();
                 midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
                 midiEvent[1] = MIDI_NOTE_ON << 4;

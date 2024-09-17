@@ -19,7 +19,25 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Get the low byte of a 16 bit number.
+ * 
+ */
+#define low(n) (n & 0x00FF)
+
+/**
+ * @brief Get the high byte of a 16 bit number.
+ * 
+ */
+#define high(n) (n >> 8)
+
 #define DEFAULT_LANGID 0x0409
+
+#define DEFAULT_PITCHBEND   8192    /* Default pitchbend value. */
+#define MAX_PITCHBEND       16383   /* Maximum upward pitchbend value. */
+#define MIN_PITCHBEND       0       /* Maximum downward pitchbend value. */
+#define MOD_PITCHBEND       56      /* Increment or decrement pitchbend value when holding keys. */
+#define CORRECT_PITCHBEND   100     /* Increment or decrement pitchbend value to correct it when no keys are pressed. */
 
 // Custom struct definitions
 
