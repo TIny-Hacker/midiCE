@@ -214,19 +214,56 @@ static usb_error_t handleUsbEvent(usb_event_t event, void *eventData, usb_callba
 
 int main(void) {
     usb_error_t error;
-    bool note = false;
     static uint8_t midiEvent[4];
 
     uint16_t pitchbend = DEFAULT_PITCHBEND;
     bool pitchUpdate = false;
+
+    static uint8_t kb_DataBackup[6];
+
+    static const uint8_t notes[6][8] = {
+        {0, 0, 0, 0, 0, 0, 72, 73},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {88, 86, 84, 82, 80, 78, 76, 74},
+        {89, 87, 85, 83, 81, 79, 77, 75},
+        {46 | DRUMPAD, 44 | DRUMPAD, 42 | DRUMPAD, 40 | DRUMPAD, 38 | DRUMPAD, 36 | DRUMPAD, 0, 0},
+        {47 | DRUMPAD, 45 | DRUMPAD, 43 | DRUMPAD, 41 | DRUMPAD, 39 | DRUMPAD, 37 | DRUMPAD, 0, 0},
+    };
 
     gfx_Begin();
 
     if ((error = usb_Init(handleUsbEvent, NULL, &standard, USB_DEFAULT_INIT_FLAGS)) == USB_SUCCESS) {
         while (kb_AnyKey());
         while (!kb_IsDown(kb_KeyClear)) {
+            for (uint8_t i = 0; i < 6; i++) { // Back up important keypad registers to compare after scan
+                kb_DataBackup[i] = kb_Data[i + 1];
+            }
+
             kb_Scan();
             usb_HandleEvents();
+
+            for (uint8_t i = 0; i < 6; i++) { // Scan for keyboard
+                for (uint8_t j = 0; j < 8; j++) {
+                    if (bit(kb_Data[i + 1], j) != bit(kb_DataBackup[i], j) && notes[i][j]) { // kb_Data is not zero indexed or something
+                        if (bit(kb_Data[i + 1], j)) { // Key was just pressed
+                            midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
+                            midiEvent[1] = MIDI_NOTE_ON << 4;
+                        } else {
+                            midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_OFF;
+                            midiEvent[1] = MIDI_NOTE_OFF << 4;
+                        }
+
+                        if (bit(notes[i][j], 7)) { // Drumpad
+                            midiEvent[1] = midiEvent[1] | MIDI_CHANNEL9;
+                        }
+
+                        midiEvent[2] = notes[i][j] & DRUMPAD_MASK;
+                        midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
+
+                        while (USB_SUCCESS != usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL));
+                    }
+                }
+            }
 
             if (kb_IsDown(kb_KeyLeft) && pitchbend) {
                 if (pitchbend > MOD_PITCHBEND) { // Ensure that the pitchbend value stays within range
@@ -270,27 +307,6 @@ int main(void) {
 
                 if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
                     pitchUpdate = false;
-                }
-            }
-
-            if (!kb_IsDown(kb_Key8) && note) {
-                midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_OFF;
-                midiEvent[1] = MIDI_NOTE_OFF << 4;
-                midiEvent[2] = 69; // A4
-                midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
-
-                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
-                    note = false;
-                }
-            } else if (kb_IsDown(kb_Key8) && !note) {
-                gfx_ZeroScreen();
-                midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
-                midiEvent[1] = MIDI_NOTE_ON << 4;
-                midiEvent[2] = 69;
-                midiEvent[3] = 0x7F;
-
-                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
-                    note = true;
                 }
             }
         }

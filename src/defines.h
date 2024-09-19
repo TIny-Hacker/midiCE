@@ -20,6 +20,12 @@ extern "C" {
 #endif
 
 /**
+ * @brief Check a specified bit in a number.
+ * 
+ */
+#define bit(n, bit) ((n) & (1U << (bit)))
+
+/**
  * @brief Get the low byte of a 16 bit number.
  * 
  */
@@ -38,6 +44,9 @@ extern "C" {
 #define MIN_PITCHBEND       0       /* Maximum downward pitchbend value. */
 #define MOD_PITCHBEND       56      /* Increment or decrement pitchbend value when holding keys. */
 #define CORRECT_PITCHBEND   100     /* Increment or decrement pitchbend value to correct it when no keys are pressed. */
+
+#define DRUMPAD             1 << 7  /* Note is on the drumpad. */
+#define DRUMPAD_MASK        127     /* Mask drumpad bit out for MIDI data. */
 
 // Custom struct definitions
 
@@ -120,6 +129,29 @@ enum {
     MIDI_CABLE13,
     MIDI_CABLE14,
     MIDI_CABLE15
+};
+
+/**
+ * @brief MIDI Channel Numbers
+ * 
+ */
+enum {
+    MIDI_CHANNEL0,
+    MIDI_CHANNEL1,
+    MIDI_CHANNEL2,
+    MIDI_CHANNEL3,
+    MIDI_CHANNEL4,
+    MIDI_CHANNEL5,
+    MIDI_CHANNEL6,
+    MIDI_CHANNEL7,
+    MIDI_CHANNEL8,
+    MIDI_CHANNEL9,
+    MIDI_CHANNEL10,
+    MIDI_CHANNEL11,
+    MIDI_CHANNEL12,
+    MIDI_CHANNEL13,
+    MIDI_CHANNEL14,
+    MIDI_CHANNEL15
 };
 
 /**
