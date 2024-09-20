@@ -26,6 +26,12 @@ extern "C" {
 #define bit(n, bit) ((n) & (1U << (bit)))
 
 /**
+ * @brief Toggles a specified bit in a number.
+ * 
+ */
+#define toggle(n, bit) (n ^ (1U << bit))
+
+/**
  * @brief Get the low byte of a 16 bit number.
  * 
  */

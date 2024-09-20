@@ -153,8 +153,6 @@ static struct {
         .bmAttributes = USB_BULK_TRANSFER,
         .wMaxPacketSize = 0x40,
         .bInterval = 0,
-        //.bRefresh = 0,      (Likely unused)
-        //.bSynchAddress = 0,
     },
     .midi_endpoint = {
         .bLength = sizeof(configuration1.midi_endpoint),
@@ -179,8 +177,6 @@ static const usb_device_descriptor_t device = {
     .bMaxPacketSize0 = 0x40,
     .idVendor = 0x0451, // Texas Instruments
     .idProduct = 0x1337,
-    // .idVendor = 0x1963, // IK Multimedia
-    // .idProduct = 0x001F, // Unknown? (iRig Keys Mini)
     .bcdDevice = 0x0100,
     .iManufacturer = 2,
     .iProduct = 1,
@@ -219,7 +215,7 @@ int main(void) {
     uint16_t pitchbend = DEFAULT_PITCHBEND;
     bool pitchUpdate = false;
 
-    static uint8_t kb_DataBackup[6];
+    static uint8_t kbBackup[6] = {0, 0, 0, 0, 0, 0};
 
     static const uint8_t notes[6][8] = {
         {0, 0, 0, 0, 0, 0, 72, 73},
@@ -234,21 +230,21 @@ int main(void) {
 
     if ((error = usb_Init(handleUsbEvent, NULL, &standard, USB_DEFAULT_INIT_FLAGS)) == USB_SUCCESS) {
         while (kb_AnyKey());
-        while (!kb_IsDown(kb_KeyClear)) {
-            for (uint8_t i = 0; i < 6; i++) { // Back up important keypad registers to compare after scan
-                kb_DataBackup[i] = kb_Data[i + 1];
-            }
-
+        while (!(kb_IsDown(kb_KeyClear) && !kb_Data[1] && !kb_Data[2] && !kb_Data[3] && !kb_Data[4] && !kb_Data[5])) {
             kb_Scan();
             usb_HandleEvents();
 
             for (uint8_t i = 0; i < 6; i++) { // Scan for keyboard
                 for (uint8_t j = 0; j < 8; j++) {
-                    if (bit(kb_Data[i + 1], j) != bit(kb_DataBackup[i], j) && notes[i][j]) { // kb_Data is not zero indexed or something
+                    if (bit(kb_Data[i + 1], j) != bit(kbBackup[i], j) && notes[i][j]) { // kb_Data is not zero indexed bc the first two bytes are empty
                         if (bit(kb_Data[i + 1], j)) { // Key was just pressed
                             midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
                             midiEvent[1] = MIDI_NOTE_ON << 4;
-                        } else {
+                        } else if (notes[i][j]) {
+                            if (kb_IsDown(kb_KeyVars)) {
+                                continue;
+                            }
+
                             midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_OFF;
                             midiEvent[1] = MIDI_NOTE_OFF << 4;
                         }
@@ -260,7 +256,9 @@ int main(void) {
                         midiEvent[2] = notes[i][j] & DRUMPAD_MASK;
                         midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
 
-                        while (USB_SUCCESS != usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL));
+                        if (USB_SUCCESS == usb_InterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, 5, NULL)) {
+                            kbBackup[i] = toggle(kbBackup[i], j); // Back up state of key once it has been accounted for
+                        }
                     }
                 }
             }
@@ -300,14 +298,13 @@ int main(void) {
             }
 
             if (pitchUpdate) {
+                pitchUpdate = false;
                 midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_PITCHBEND_CHANGE;
                 midiEvent[1] = MIDI_PITCHBEND_CHANGE << 4;
                 midiEvent[2] = low(pitchbend << 1) >> 1; // Split 16 bit number into two 7 bit numbers, since MIDI needs the most significant bit clear
                 midiEvent[3] = high(pitchbend << 1);
 
-                if (USB_SUCCESS == usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
-                    pitchUpdate = false;
-                }
+                while (USB_SUCCESS != usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL));
             }
         }
     }
