@@ -276,11 +276,14 @@ int main(void) {
                             midiEvent[1] = MIDI_NOTE_OFF << 4;
                         }
 
+                        midiEvent[2] = notes[i][j] & DRUMPAD_MASK;
+
                         if (bit(notes[i][j], 7)) { // Drumpad
                             midiEvent[1] = midiEvent[1] | MIDI_CHANNEL9;
+                        } else {
+                            midiEvent[2] += octaveShift; // Only octave shift notes, not drums.
                         }
 
-                        midiEvent[2] = (notes[i][j] & DRUMPAD_MASK) + octaveShift;
                         midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
 
                         if (USB_SUCCESS == usb_InterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, 5, NULL)) {
