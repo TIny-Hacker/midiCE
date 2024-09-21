@@ -54,6 +54,21 @@ extern "C" {
 #define DRUMPAD             1 << 7  /* Note is on the drumpad. */
 #define DRUMPAD_MASK        127     /* Mask drumpad bit out for MIDI data. */
 
+#define CC16                16      /* CC16 MIDI controller. */
+#define CC17                17      /* CC17 MIDI controller. */
+#define CC18                18      /* CC18 MIDI controller.*/
+#define CC19                19      /* CC19 MIDI controller. */
+
+#define DEFAULT_CONTROL     8192    /* Default control value. */
+#define MAX_CONTROL         16383   /* Maximum control value. */
+#define MIN_CONTROL         0       /* Minimum control value. */
+#define CONTROL_CHANGE      32      /* Increment or decrement control value. */
+#define CONTROL_DOWN        8       /* Control key decreases value. */
+#define CONTROL_MASK        7       /* Mask control up / down out. */
+
+#define OCTAVE_MAX          2 * 12  /* Maximum octave shift value. */
+#define OCTAVE_MIN          -5 * 12 /* Minimum octave shift value. */
+
 // Custom struct definitions
 
 typedef struct usb_interface_association_descriptor {

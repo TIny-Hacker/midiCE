@@ -215,16 +215,22 @@ int main(void) {
     uint16_t pitchbend = DEFAULT_PITCHBEND;
     bool pitchUpdate = false;
 
+    int8_t octaveShift = 0;
+    bool octaveUpPressed = false;
+    bool octaveDownPressed = false;
+
     static uint8_t kbBackup[6] = {0, 0, 0, 0, 0, 0};
 
     static const uint8_t notes[6][8] = {
-        {0, 0, 0, 0, 0, 0, 72, 73},
-        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1 | CONTROL_DOWN, 72, 73},
+        {0, 4, 4 | CONTROL_DOWN, 3, 3 | CONTROL_DOWN, 2, 2 | CONTROL_DOWN, 1},
         {88, 86, 84, 82, 80, 78, 76, 74},
         {89, 87, 85, 83, 81, 79, 77, 75},
         {46 | DRUMPAD, 44 | DRUMPAD, 42 | DRUMPAD, 40 | DRUMPAD, 38 | DRUMPAD, 36 | DRUMPAD, 0, 0},
         {47 | DRUMPAD, 45 | DRUMPAD, 43 | DRUMPAD, 41 | DRUMPAD, 39 | DRUMPAD, 37 | DRUMPAD, 0, 0},
     };
+
+    static uint16_t controllers[4] = {DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL};
 
     gfx_Begin();
 
@@ -236,7 +242,28 @@ int main(void) {
 
             for (uint8_t i = 0; i < 6; i++) { // Scan for keyboard
                 for (uint8_t j = 0; j < 8; j++) {
-                    if (bit(kb_Data[i + 1], j) != bit(kbBackup[i], j) && notes[i][j]) { // kb_Data is not zero indexed bc the first two bytes are empty
+                    if (bit(kb_Data[i + 1], j) && notes[i][j] && notes[i][j] <= (4 | CONTROL_DOWN)) {
+                        midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_CONTROL_CHANGE;
+                        midiEvent[1] = MIDI_CONTROL_CHANGE << 4;
+
+                        if (bit(notes[i][j], 3)) {
+                            if (controllers[notes[i][j] & CONTROL_MASK] > CONTROL_CHANGE) {
+                                controllers[notes[i][j] & CONTROL_MASK] -= CONTROL_CHANGE;
+                            } else {
+                                controllers[notes[i][j] & CONTROL_MASK] = MIN_CONTROL;
+                            }
+                        } else {
+                            if (controllers[notes[i][j] & CONTROL_MASK] < MAX_CONTROL - CONTROL_CHANGE) {
+                                controllers[notes[i][j] & CONTROL_MASK] += CONTROL_CHANGE;
+                            } else {
+                                controllers[notes[i][j] & CONTROL_MASK] = MAX_CONTROL;
+                            }
+                        }
+
+                        midiEvent[2] = CC16 - 1 + notes[i][j] & CONTROL_MASK;
+                        midiEvent[3] = high(controllers[notes[i][j] & CONTROL_MASK] << 1);
+                        usb_InterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, 5, NULL);
+                    } else if (bit(kb_Data[i + 1], j) != bit(kbBackup[i], j) && notes[i][j]) { // kb_Data is not zero indexed bc the first two bytes are empty
                         if (bit(kb_Data[i + 1], j)) { // Key was just pressed
                             midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
                             midiEvent[1] = MIDI_NOTE_ON << 4;
@@ -253,7 +280,7 @@ int main(void) {
                             midiEvent[1] = midiEvent[1] | MIDI_CHANNEL9;
                         }
 
-                        midiEvent[2] = notes[i][j] & DRUMPAD_MASK;
+                        midiEvent[2] = (notes[i][j] & DRUMPAD_MASK) + octaveShift;
                         midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
 
                         if (USB_SUCCESS == usb_InterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, 5, NULL)) {
@@ -295,6 +322,24 @@ int main(void) {
                 }
 
                 pitchUpdate = true;
+            }
+
+            if (kb_IsDown(kb_KeyUp)) {
+                if (!octaveUpPressed && octaveShift > OCTAVE_MIN) {
+                    octaveShift -= 12;
+                    octaveUpPressed = true;
+                }
+            } else {
+                octaveUpPressed = false;
+            }
+
+            if (kb_IsDown(kb_KeyDown)) {
+                if (!octaveDownPressed && octaveShift < OCTAVE_MAX) {
+                    octaveShift += 12;
+                    octaveDownPressed = true;
+                }
+            } else {
+                octaveDownPressed = false;
             }
 
             if (pitchUpdate) {
