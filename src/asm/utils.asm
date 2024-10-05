@@ -38,6 +38,7 @@ _asm_utils_PrintString:
     ld hl, _fontData
     add hl, bc
     ld c, (hl)
+    ld a, (_textColor)
 
 .putChar:
     inc hl
@@ -51,7 +52,6 @@ _asm_utils_PrintString:
 .loop:
     sla e
     jr nc, .skipLoad
-    ld a, (_textColor)
     ld (hl), a
 
 .skipLoad:
