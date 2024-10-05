@@ -4,7 +4,7 @@
  * midiCE Studio Source Code - defines.h
  * By TIny_Hacker
  * Some code by Powerbyte7
- * Copyright 2023
+ * Copyright 2023 - 2024
  * License: GPL-3.0
  * 
  * --------------------------------------
@@ -42,6 +42,18 @@ extern "C" {
  * 
  */
 #define high(n) (n >> 8)
+
+/**
+ * @brief Get the VRAM address for a set of coordinates.
+ * 
+ */
+#define coordVRAM(x, y) (0xD40000 + x + y * 320)
+
+/**
+ * @brief Get the VRAM address for a set of coordinates in the buffer.
+ * 
+ */
+#define coordVRAMBuf(x, y) (void *)(0xD40000 + x + y * 320 + 320 * 240)
 
 #define DEFAULT_LANGID 0x0409
 
@@ -196,6 +208,22 @@ enum {
     MIDI_CHANNEL_PRESSURE,
     MIDI_PITCHBEND_CHANGE,
     MIDI_SINGLE_BYTE
+};
+
+/**
+ * @brief Common palette color indexes.
+ * 
+ */
+enum {
+    COLOR_BACKGROUND,
+    COLOR_BLUE,
+    COLOR_TAN,
+    COLOR_ORANGE,
+    COLOR_DARK_GRAY,
+    COLOR_MED_GRAY,
+    COLOR_MED_LT_GRAY,
+    COLOR_LIGHT_GRAY,
+    COLOR_MAGENTA
 };
 
 #ifdef __cplusplus

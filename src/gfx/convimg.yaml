@@ -1,0 +1,30 @@
+palettes:
+  - name: darkPalette
+    fixed-entries:
+      - color: {index: 0, hex: "#040503"}   # Background color
+      - color: {index: 1, hex: "#284261"}   # Primary blue
+      - color: {index: 2, hex: "#8A663C"}   # Primary tan
+      - color: {index: 3, hex: "#EF3C22"}   # Primary orange
+      - color: {index: 4, hex: "#1E252B"}   # Dark gray
+      - color: {index: 5, hex: "#59646E"}   # Medium gray
+      - color: {index: 6, hex: "#A1A3A5"}   # Medium light gray
+      - color: {index: 7, hex: "#CDD0C3"}   # Light gray
+      - color: {index: 8, hex: "#57304A"}   # Magenta???
+    images: automatic
+
+converts:
+  - name: sprites
+    palette: darkPalette
+    images:
+      - spokes.png
+      - dial1.png
+      - dial2.png
+      - dial3.png
+
+outputs:
+  - type: c
+    include-file: gfx.h
+    palettes:
+      - darkPalette
+    converts:
+      - sprites

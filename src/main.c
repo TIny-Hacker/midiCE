@@ -6,19 +6,21 @@
  * Some code by Powerbyte7
  * Copyright 2023 - 2024
  * License: GPL-3.0
- * Last Build: August 3, 2024
+ * Last Build: September 25, 2024
  * Version: 0.1.0
  * 
  * --------------------------------------
 **/
 
 #include "defines.h"
+#include "display.h"
+
+#include "gfx/gfx.h"
 
 #include <keypadc.h>
 #include <string.h>
 #include <usbdrvce.h>
 #include <stdint.h>
-
 #include <graphx.h>
 
 static const usb_string_descriptor_t product_name = {
@@ -233,6 +235,10 @@ int main(void) {
     static uint16_t controllers[4] = {DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL};
 
     gfx_Begin();
+    gfx_SetPalette(darkPalette, sizeof_darkPalette, 0);
+    gfx_SetDrawBuffer();
+    display_Update();
+    gfx_BlitBuffer();
 
     if ((error = usb_Init(handleUsbEvent, NULL, &standard, USB_DEFAULT_INIT_FLAGS)) == USB_SUCCESS) {
         while (kb_AnyKey());
@@ -327,22 +333,24 @@ int main(void) {
                 pitchUpdate = true;
             }
 
-            if (kb_IsDown(kb_KeyUp)) {
-                if (!octaveUpPressed && octaveShift > OCTAVE_MIN) {
-                    octaveShift -= 12;
-                    octaveUpPressed = true;
+            if (!kb_Data[1] && !kb_Data[3] && !kb_Data[3] && !kb_Data[4] && !kb_Data[5] && !kb_Data[6]) {
+                if (kb_IsDown(kb_KeyUp)) {
+                    if (!octaveUpPressed && octaveShift > OCTAVE_MIN) {
+                        octaveShift -= 12;
+                        octaveUpPressed = true;
+                    }
+                } else {
+                    octaveUpPressed = false;
                 }
-            } else {
-                octaveUpPressed = false;
-            }
 
-            if (kb_IsDown(kb_KeyDown)) {
-                if (!octaveDownPressed && octaveShift < OCTAVE_MAX) {
-                    octaveShift += 12;
-                    octaveDownPressed = true;
+                if (kb_IsDown(kb_KeyDown)) {
+                    if (!octaveDownPressed && octaveShift < OCTAVE_MAX) {
+                        octaveShift += 12;
+                        octaveDownPressed = true;
+                    }
+                } else {
+                    octaveDownPressed = false;
                 }
-            } else {
-                octaveDownPressed = false;
             }
 
             if (pitchUpdate) {
