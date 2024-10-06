@@ -22,7 +22,6 @@ _asm_utils_PrintString:
     ex (sp), hl ; String pointer
     push de
     push bc
-    ld bc, 0
 
 .getChar:
     ld c, (hl)
@@ -59,7 +58,7 @@ _asm_utils_PrintString:
     dec d
     jr nz, .loop
     pop hl
-    ld de, 320
+    ld de, ti.lcdWidth
     add hl, de
     ex de, hl
     pop hl
