@@ -24,12 +24,10 @@ _asm_utils_PrintString:
     push bc
 
 .getChar:
-    ld c, (hl)
-    xor a, a
-    or a, c
+    ld a, (hl)
+    or a, a
     ret z
     push hl
-    ld a, c
     sub a, '+'
     ld c, a
     ld b, 9
@@ -37,21 +35,21 @@ _asm_utils_PrintString:
     ld hl, _fontData
     add hl, bc
     ld c, (hl)
-    ld a, (_textColor)
 
 .putChar:
     inc hl
     push hl ; LUT
     push de
-    ld e, (hl)
+    ld a, (hl)
     pop hl ; VRAM
     push hl
     ld d, 9
 
 .loop:
-    sla e
+    add a, a
     jr nc, .skipLoad
-    ld (hl), a
+    ld (hl), $FF
+_textColor := $ - 1
 
 .skipLoad:
     inc hl
@@ -67,8 +65,5 @@ _asm_utils_PrintString:
     pop hl
     inc hl
     jr .getChar
-
-_textColor:
-    db $FF
 
 include 'font.asm'
