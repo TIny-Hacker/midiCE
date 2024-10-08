@@ -21,7 +21,8 @@
 #include <string.h>
 #include <usbdrvce.h>
 #include <stdint.h>
-#include <graphx.h>
+
+#include <time.h>
 
 static const usb_string_descriptor_t product_name = {
     .bLength = sizeof(product_name) + 12, // 12 includes length of .bString
@@ -214,10 +215,19 @@ int main(void) {
     usb_error_t error;
     static uint8_t midiEvent[4];
 
-    uint16_t pitchbend = DEFAULT_PITCHBEND;
+    state_t state = {
+        0,
+        MOD_PITCHBEND,
+        DEFAULT_VELOCITY,
+        VOICE_POLY,
+        MIDI_CHANNEL0,
+        THEME_DARK,
+        0,
+        DEFAULT_PITCHBEND,
+    };
+
     bool pitchUpdate = false;
 
-    int8_t octaveShift = 0;
     bool octaveUpPressed = false;
     bool octaveDownPressed = false;
 
@@ -236,9 +246,23 @@ int main(void) {
 
     gfx_Begin();
     gfx_SetPalette(darkPalette, sizeof_darkPalette, 0);
+    gfx_SetTransparentColor(255);
     gfx_SetDrawBuffer();
-    display_Update();
+
+    display_Text();
+    display_Status(state);
+    display_Settings(state);
+
+    gfx_SetColor(COLOR_BLUE);
+    display_Dial(dial1, 64, 254, 35);
+    gfx_SetColor(COLOR_TAN);
+    display_Dial(dial2, 89, 254, 105);
+    gfx_SetColor(COLOR_ORANGE);
+    display_Dial(dial3, 234, 254, 174);
+
     gfx_BlitBuffer();
+
+    clock_t clockOffset = clock();
 
     if ((error = usb_Init(handleUsbEvent, NULL, &standard, USB_DEFAULT_INIT_FLAGS)) == USB_SUCCESS) {
         while (kb_AnyKey());
@@ -287,10 +311,10 @@ int main(void) {
                         if (bit(notes[i][j], 7)) { // Drumpad
                             midiEvent[1] = midiEvent[1] | MIDI_CHANNEL9;
                         } else {
-                            midiEvent[2] += octaveShift; // Only octave shift notes, not drums.
+                            midiEvent[2] += state.octave; // Only octave shift notes, not drums.
                         }
 
-                        midiEvent[3] = 0x7F; // Velocity? I'm just copying what Powerbyte's keyboard did for now
+                        midiEvent[3] = state.velocity;
 
                         if (USB_SUCCESS == usb_InterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, 5, NULL)) {
                             kbBackup[i] = toggle(kbBackup[i], j); // Back up state of key once it has been accounted for
@@ -299,35 +323,35 @@ int main(void) {
                 }
             }
 
-            if (kb_IsDown(kb_KeyLeft) && pitchbend) {
-                if (pitchbend > MOD_PITCHBEND) { // Ensure that the pitchbend value stays within range
-                    pitchbend -= MOD_PITCHBEND;
+            if (kb_IsDown(kb_KeyLeft) && state.pitchbend) {
+                if (state.pitchbend > MOD_PITCHBEND) { // Ensure that the pitchbend value stays within range
+                    state.pitchbend -= MOD_PITCHBEND;
                 } else {
-                    pitchbend = MIN_PITCHBEND;
+                    state.pitchbend = MIN_PITCHBEND;
                 }
 
                 pitchUpdate = true;
-            } else if (kb_IsDown(kb_KeyRight) && pitchbend < MAX_PITCHBEND) {
-                if (pitchbend < MAX_PITCHBEND - MOD_PITCHBEND) {
-                    pitchbend += MOD_PITCHBEND;
+            } else if (kb_IsDown(kb_KeyRight) && state.pitchbend < MAX_PITCHBEND) {
+                if (state.pitchbend < MAX_PITCHBEND - MOD_PITCHBEND) {
+                    state.pitchbend += MOD_PITCHBEND;
                 } else {
-                    pitchbend = MAX_PITCHBEND;
+                    state.pitchbend = MAX_PITCHBEND;
                 }
 
                 pitchUpdate = true;
-            } else if (pitchbend < DEFAULT_PITCHBEND) { // Correct pitch bend if keys are released
-                if (pitchbend + CORRECT_PITCHBEND < DEFAULT_PITCHBEND) {
-                    pitchbend += CORRECT_PITCHBEND;
+            } else if (state.pitchbend < DEFAULT_PITCHBEND) { // Correct pitch bend if keys are released
+                if (state.pitchbend + CORRECT_PITCHBEND < DEFAULT_PITCHBEND) {
+                    state.pitchbend += CORRECT_PITCHBEND;
                 } else {
-                    pitchbend = DEFAULT_PITCHBEND;
+                    state.pitchbend = DEFAULT_PITCHBEND;
                 }
 
                 pitchUpdate = true;
-            } else if (pitchbend > DEFAULT_PITCHBEND) {
-                if (pitchbend - CORRECT_PITCHBEND > DEFAULT_PITCHBEND) {
-                    pitchbend -= CORRECT_PITCHBEND;
+            } else if (state.pitchbend > DEFAULT_PITCHBEND) {
+                if (state.pitchbend - CORRECT_PITCHBEND > DEFAULT_PITCHBEND) {
+                    state.pitchbend -= CORRECT_PITCHBEND;
                 } else {
-                    pitchbend = DEFAULT_PITCHBEND;
+                    state.pitchbend = DEFAULT_PITCHBEND;
                 }
 
                 pitchUpdate = true;
@@ -335,8 +359,8 @@ int main(void) {
 
             if (!kb_Data[1] && !kb_Data[3] && !kb_Data[3] && !kb_Data[4] && !kb_Data[5] && !kb_Data[6]) {
                 if (kb_IsDown(kb_KeyUp)) {
-                    if (!octaveUpPressed && octaveShift > OCTAVE_MIN) {
-                        octaveShift -= 12;
+                    if (!octaveUpPressed && state.octave > OCTAVE_MIN) {
+                        state.octave -= 12;
                         octaveUpPressed = true;
                     }
                 } else {
@@ -344,8 +368,8 @@ int main(void) {
                 }
 
                 if (kb_IsDown(kb_KeyDown)) {
-                    if (!octaveDownPressed && octaveShift < OCTAVE_MAX) {
-                        octaveShift += 12;
+                    if (!octaveDownPressed && state.octave < OCTAVE_MAX) {
+                        state.octave += 12;
                         octaveDownPressed = true;
                     }
                 } else {
@@ -357,10 +381,16 @@ int main(void) {
                 pitchUpdate = false;
                 midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_PITCHBEND_CHANGE;
                 midiEvent[1] = MIDI_PITCHBEND_CHANGE << 4;
-                midiEvent[2] = low(pitchbend << 1) >> 1; // Split 16 bit number into two 7 bit numbers, since MIDI needs the most significant bit clear
-                midiEvent[3] = high(pitchbend << 1);
+                midiEvent[2] = low(state.pitchbend << 1) >> 1; // Split 16 bit number into two 7 bit numbers, since MIDI needs the most significant bit clear
+                midiEvent[3] = high(state.pitchbend << 1);
 
                 while (USB_SUCCESS != usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL));
+            }
+
+            if (clock() - clockOffset > CLOCKS_PER_SEC / 20) {
+                clockOffset = clock();
+                display_Status(state);
+                gfx_BlitBuffer();
             }
         }
     }

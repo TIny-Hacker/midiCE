@@ -15,11 +15,13 @@ palettes:
 converts:
   - name: sprites
     palette: darkPalette
+    transparent-index: 255
     images:
       - spokes.png
       - dial1.png
       - dial2.png
       - dial3.png
+      - dialNeedle.png
 
 outputs:
   - type: c

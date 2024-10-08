@@ -14,6 +14,7 @@
 #define DEFINES_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,6 +82,14 @@ extern "C" {
 #define OCTAVE_MAX          2 * 12  /* Maximum octave shift value. */
 #define OCTAVE_MIN          -5 * 12 /* Minimum octave shift value. */
 
+#define DEFAULT_VELOCITY    0x7F    /* Default velocity value for note events. */
+
+#define VOICE_MONO          0       /* Mono voice. */
+#define VOICE_POLY          1       /* Poly voice. */
+
+#define THEME_DARK          0       /* Dark theme setting. */
+#define THEME_LIGHT         1       /* Light theme setting. */
+
 // Custom struct definitions
 
 typedef struct usb_interface_association_descriptor {
@@ -140,6 +149,17 @@ typedef struct midistreaming_endpoint_descriptor {
     uint8_t bNumEmbMIDIJack;
     uint8_t baAssocJackID;
 } midistreaming_endpoint_descriptor_t;
+
+typedef struct state {
+    uint8_t root;
+    uint8_t bend;
+    uint8_t velocity;
+    uint8_t voice;
+    uint8_t channel;
+    bool theme;
+    int8_t octave;
+    uint16_t pitchbend;
+} state_t;
 
 /**
  * @brief MIDI Event Cable Numbers

@@ -12,17 +12,41 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-
+#include <graphx.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Redraws the main display.
+ * @brief Draws a dial.
+ * 
+ * @param dial Background sprite for dial.
+ * @param angle Angle of the dial's needle.
+ * @param x Top-left x coordinate of the dial.
+ * @param y Top-left y coordinate of the dial.
+ */
+void display_Dial(gfx_sprite_t *dial, uint8_t angle, unsigned int x, uint8_t y);
+
+/**
+ * @brief Draws the values associated with each setting.
+ * 
+ * @param state State of the program.
+ */
+void display_Settings(state_t state);
+
+/**
+ * @brief Draws the values associated with the current status of the program.
+ * 
+ * @param state State of the program.
+ */
+void display_Status(state_t state);
+
+/**
+ * @brief Draws all background text.
  * 
  */
-void display_Update(void);
+void display_Text(void);
 
 #ifdef __cplusplus
 }
