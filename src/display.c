@@ -35,6 +35,32 @@ void display_Settings(state_t state) {
     display_Rect(161, 88, 11, 19);
     gfx_SetColor(COLOR_ORANGE);
     display_Rect(125, 80, 11, 35);
+
+    *(&textColor) = COLOR_BACKGROUND;
+
+    if (state.voice == VOICE_MONO) {
+        asm_utils_PrintString(coordVRAMBuf(198, 82), "MONO");
+    } else {
+        asm_utils_PrintString(coordVRAMBuf(198, 82), "POLY");
+    }
+
+    static char channel[3] = {'0', '0', '\0'};
+
+
+    if (state.channel > MIDI_CHANNEL9) {
+        channel[0] = '1';
+        channel[1] = state.channel - 10 + '0';
+    } else {
+        channel[1] = state.channel + '0';
+    }
+
+    asm_utils_PrintString(coordVRAMBuf(162, 90), channel);
+
+    if (state.theme == THEME_DARK) {
+        asm_utils_PrintString(coordVRAMBuf(126, 82), "DARK");
+    } else {
+        asm_utils_PrintString(coordVRAMBuf(126, 82), "LITE");
+    }
 }
 
 void display_Status(state_t state) {
@@ -55,6 +81,12 @@ void display_Status(state_t state) {
     gfx_SetPixel(50, 21);
     gfx_SetPixel(26, 218);
     gfx_SetPixel(50, 218);
+    gfx_FillRectangle_NoClip(89, 98, 7, 8);
+
+    *(&textColor) = COLOR_MED_LT_GRAY;
+    static char octave[2] = {0, 0};
+    octave[0] = ((state.octave - OCTAVE_MIN) / 12) + '0';
+    asm_utils_PrintString(coordVRAMBuf(88, 98), octave);
 }
 
 void display_Text(void) {
