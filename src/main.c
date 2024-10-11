@@ -216,7 +216,7 @@ int main(void) {
     static uint8_t midiEvent[4];
 
     state_t state = {
-        0,
+        1,
         MOD_PITCHBEND,
         DEFAULT_VELOCITY,
         VOICE_POLY,
@@ -254,11 +254,11 @@ int main(void) {
     display_Settings(state);
 
     gfx_SetColor(COLOR_BLUE);
-    display_Dial(dial1, 64, 254, 35);
+    display_Dial(dial1, state.root, 11, 254, 35);
     gfx_SetColor(COLOR_TAN);
-    display_Dial(dial2, 89, 254, 105);
+    display_Dial(dial2, state.bend, 0xFF, 254, 105);
     gfx_SetColor(COLOR_ORANGE);
-    display_Dial(dial3, 234, 254, 174);
+    display_Dial(dial3, state.velocity, 0xFF, 254, 174);
 
     gfx_BlitBuffer();
 

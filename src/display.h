@@ -22,11 +22,12 @@ extern "C" {
  * @brief Draws a dial.
  * 
  * @param dial Background sprite for dial.
- * @param angle Angle of the dial's needle.
+ * @param value Value to be displayed by needle.
+ * @param max Maximum needle value.
  * @param x Top-left x coordinate of the dial.
  * @param y Top-left y coordinate of the dial.
  */
-void display_Dial(gfx_sprite_t *dial, uint8_t angle, unsigned int x, uint8_t y);
+void display_Dial(gfx_sprite_t *dial, uint8_t value, uint8_t max, unsigned int x, uint8_t y);
 
 /**
  * @brief Draws the values associated with each setting.

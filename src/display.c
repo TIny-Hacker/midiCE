@@ -15,17 +15,42 @@
 
 #include <graphx.h>
 #include <keypadc.h>
+#include <string.h>
 
 static void display_Rect(unsigned int x, uint8_t y, uint8_t width, uint8_t height) {
     gfx_FillRectangle_NoClip(x + 1, y, width - 2, height);
     gfx_FillRectangle_NoClip(x, y + 1, width, height - 2);
 }
 
-void display_Dial(gfx_sprite_t *dial, uint8_t angle, unsigned int x, uint8_t y) {
+void display_Dial(gfx_sprite_t *dial, uint8_t value, uint8_t max, unsigned int x, uint8_t y) {
     gfx_Sprite_NoClip(spokes, x - 2, y - 9);
     gfx_TransparentSprite_NoClip(dial, x, y);
-    gfx_RotatedTransparentSprite_NoClip(dialNeedle, x, y, angle);
+    gfx_RotatedTransparentSprite_NoClip(dialNeedle, x, y, 31 + (double)191 * (double)value / (double)max);
     display_Rect(x - 21, y + 26, 11, 19);
+
+    *(&textColor) = COLOR_BACKGROUND;
+
+    if (dial == dial1) {
+        static char *notes[12] = {
+            "C", "C@", "D", "D@", "E", "F", "F@", "G", "G@", "A", "A@", "B" // @ is # in custom font
+        };
+
+        void *start = coordVRAMBuf(234, 67);
+
+        if ((notes[value])[1]) {
+            start -= 320 * 4;
+        }
+
+        asm_utils_PrintString(start, notes[value]);
+    } else {
+        char valPrint[3] = {(value - (value % 0x10)) / 0x10 + '0', value % 0x10 + '0', '\0'};
+
+        if (dial == dial2) { // I don't like this
+            asm_utils_PrintString(coordVRAMBuf(234, 133), valPrint);
+        } else {
+            asm_utils_PrintString(coordVRAMBuf(234, 202), valPrint);
+        }
+    }
 }
 
 void display_Settings(state_t state) {
@@ -44,8 +69,7 @@ void display_Settings(state_t state) {
         asm_utils_PrintString(coordVRAMBuf(198, 82), "POLY");
     }
 
-    static char channel[3] = {'0', '0', '\0'};
-
+    static char channel[3] = "00";
 
     if (state.channel > MIDI_CHANNEL9) {
         channel[0] = '1';
