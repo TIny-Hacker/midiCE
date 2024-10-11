@@ -12,7 +12,7 @@ ICON = icon.png
 DESCRIPTION = "USB MIDI controller"
 COMPRESSED = YES
 ARCHIVED = YES
-VERSION = 0.1.0
+VERSION = 0.2.0
 
 CFLAGS = -Wall -Wextra -Oz -DVERSION_NO=\"$(VERSION)\"
 CXXFLAGS = -Wall -Wextra -Oz  -DVERSION_NO=\"$(VERSION)\"

@@ -6,8 +6,8 @@
  * Some code by Powerbyte7
  * Copyright 2023 - 2024
  * License: GPL-3.0
- * Last Build: September 25, 2024
- * Version: 0.1.0
+ * Last Build: October 11, 2024
+ * Version: 0.2.0
  * 
  * --------------------------------------
 **/
