@@ -75,6 +75,7 @@ void display_Settings(state_t state) {
         channel[0] = '1';
         channel[1] = state.channel - 10 + '0';
     } else {
+        channel[0] = '0';
         channel[1] = state.channel + '0';
     }
 
@@ -119,7 +120,7 @@ void display_Text(void) {
     *(&textColor) = COLOR_MED_LT_GRAY;
     asm_utils_PrintString(coordVRAMBuf(234, 22), "ROOT");
     asm_utils_PrintString(coordVRAMBuf(234, 92), "BEND");
-    asm_utils_PrintString(coordVRAMBuf(234, 161), "VEL.");
+    asm_utils_PrintString(coordVRAMBuf(234, 161), "VEL+");
     asm_utils_PrintString(coordVRAMBuf(88, 21), "OCTAVE");
     asm_utils_PrintString(coordVRAMBuf(88, 121), "SUSTAIN");
 

@@ -14,6 +14,7 @@
 
 #include "defines.h"
 #include "display.h"
+#include "settings.h"
 
 #include "gfx/gfx.h"
 
@@ -216,7 +217,7 @@ int main(void) {
     static uint8_t midiEvent[4];
 
     state_t state = {
-        1,
+        0,
         MOD_PITCHBEND,
         DEFAULT_VELOCITY,
         VOICE_POLY,
@@ -269,6 +270,10 @@ int main(void) {
         while (!(kb_IsDown(kb_KeyClear) && !kb_Data[1] && !kb_Data[2] && !kb_Data[3] && !kb_Data[4] && !kb_Data[5])) {
             kb_Scan();
             usb_HandleEvents();
+
+            if (kb_IsDown(kb_KeyZoom)) {
+                settings_Open(&state);
+            }
 
             for (uint8_t i = 0; i < 6; i++) { // Scan for keyboard
                 for (uint8_t j = 0; j < 8; j++) {
