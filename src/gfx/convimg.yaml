@@ -21,7 +21,7 @@ palettes:
       - color: {index: 5, hex: "#C3BFC3"}
       - color: {index: 6, hex: "#868486"}
       - color: {index: 7, hex: "#5A656B"}
-      - color: {index: 8, hex: "#57304A"}
+      - color: {index: 8, hex: "#4EBA4A"}
       - color: {index: 9, hex: "#000000"}
       - color: {index: 10, hex: "#E3E4E6"}
       - color: {index: 11, hex: "#BDBFC5"}
