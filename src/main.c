@@ -259,7 +259,7 @@ int main(void) {
     gfx_SetColor(COLOR_TAN);
     display_Dial(dial2, state.bend, 0xFF, 254, 105);
     gfx_SetColor(COLOR_ORANGE);
-    display_Dial(dial3, state.velocity, 0xFF, 254, 174);
+    display_Dial(dial3, state.velocity, MAX_VELOCITY, 254, 174);
 
     gfx_BlitBuffer();
 
@@ -279,7 +279,7 @@ int main(void) {
                 for (uint8_t j = 0; j < 8; j++) {
                     if (bit(kb_Data[i + 1], j) && notes[i][j] && notes[i][j] <= (4 | CONTROL_DOWN)) {
                         midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_CONTROL_CHANGE;
-                        midiEvent[1] = MIDI_CONTROL_CHANGE << 4;
+                        midiEvent[1] = MIDI_CONTROL_CHANGE << 4 | state.channel;
 
                         if (bit(notes[i][j], 3)) {
                             if (controllers[notes[i][j] & CONTROL_MASK] > CONTROL_CHANGE) {
@@ -301,14 +301,14 @@ int main(void) {
                     } else if (bit(kb_Data[i + 1], j) != bit(kbBackup[i], j) && notes[i][j]) { // kb_Data is not zero indexed bc the first two bytes are empty
                         if (bit(kb_Data[i + 1], j)) { // Key was just pressed
                             midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
-                            midiEvent[1] = MIDI_NOTE_ON << 4;
+                            midiEvent[1] = MIDI_NOTE_ON << 4 | state.channel;
                         } else if (notes[i][j]) {
                             if (kb_IsDown(kb_KeyVars)) {
                                 continue;
                             }
 
                             midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_OFF;
-                            midiEvent[1] = MIDI_NOTE_OFF << 4;
+                            midiEvent[1] = MIDI_NOTE_OFF << 4 | state.channel;
                         }
 
                         midiEvent[2] = notes[i][j] & DRUMPAD_MASK;
@@ -316,7 +316,7 @@ int main(void) {
                         if (bit(notes[i][j], 7)) { // Drumpad
                             midiEvent[1] = midiEvent[1] | MIDI_CHANNEL9;
                         } else {
-                            midiEvent[2] += state.octave; // Only octave shift notes, not drums.
+                            midiEvent[2] += state.octave + state.root; // Only octave / root shift notes, not drums.
                         }
 
                         midiEvent[3] = state.velocity;
@@ -329,16 +329,16 @@ int main(void) {
             }
 
             if (kb_IsDown(kb_KeyLeft) && state.pitchbend) {
-                if (state.pitchbend > MOD_PITCHBEND) { // Ensure that the pitchbend value stays within range
-                    state.pitchbend -= MOD_PITCHBEND;
+                if (state.pitchbend > state.bend) { // Ensure that the pitchbend value stays within range
+                    state.pitchbend -= state.bend;
                 } else {
                     state.pitchbend = MIN_PITCHBEND;
                 }
 
                 pitchUpdate = true;
             } else if (kb_IsDown(kb_KeyRight) && state.pitchbend < MAX_PITCHBEND) {
-                if (state.pitchbend < MAX_PITCHBEND - MOD_PITCHBEND) {
-                    state.pitchbend += MOD_PITCHBEND;
+                if (state.pitchbend < MAX_PITCHBEND - state.bend) {
+                    state.pitchbend += state.bend;
                 } else {
                     state.pitchbend = MAX_PITCHBEND;
                 }
@@ -385,7 +385,7 @@ int main(void) {
             if (pitchUpdate) {
                 pitchUpdate = false;
                 midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_PITCHBEND_CHANGE;
-                midiEvent[1] = MIDI_PITCHBEND_CHANGE << 4;
+                midiEvent[1] = MIDI_PITCHBEND_CHANGE << 4 | state.channel;
                 midiEvent[2] = low(state.pitchbend << 1) >> 1; // Split 16 bit number into two 7 bit numbers, since MIDI needs the most significant bit clear
                 midiEvent[3] = high(state.pitchbend << 1);
 

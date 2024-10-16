@@ -151,8 +151,10 @@ void settings_Open(state_t *state) {
                             state->velocity += 1;
                         }
 
+                        state->velocity &= MAX_VELOCITY;
+
                         gfx_SetColor(COLOR_ORANGE);
-                        display_Dial(dial3, state->velocity, 0xFF, 254, 174);
+                        display_Dial(dial3, state->velocity, MAX_VELOCITY, 254, 174);
                         break;
                     case 3:
                         if (kb_IsDown(kb_KeyLeft) || kb_IsDown(kb_KeyRight)) {
@@ -181,6 +183,12 @@ void settings_Open(state_t *state) {
                     case 5:
                         if (kb_IsDown(kb_KeyLeft) || kb_IsDown(kb_KeyRight)) {
                             state->theme = !state->theme;
+                        }
+
+                        if (state->theme == THEME_DARK) {
+                            gfx_SetPalette(darkPalette, sizeof_darkPalette, 0);
+                        }  else {
+                            gfx_SetPalette(lightPalette, sizeof_lightPalette, 0);
                         }
 
                         display_Settings(*state);

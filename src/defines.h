@@ -82,7 +82,8 @@ extern "C" {
 #define OCTAVE_MAX          2 * 12  /* Maximum octave shift value. */
 #define OCTAVE_MIN          -5 * 12 /* Minimum octave shift value. */
 
-#define DEFAULT_VELOCITY    0x7F    /* Default velocity value for note events. */
+#define DEFAULT_VELOCITY    0x64    /* Default velocity value for note events. */
+#define MAX_VELOCITY        0x7F
 
 #define VOICE_MONO          0       /* Mono voice. */
 #define VOICE_POLY          1       /* Poly voice. */

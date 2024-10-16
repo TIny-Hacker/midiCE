@@ -11,6 +11,43 @@ palettes:
       - color: {index: 7, hex: "#CDD0C3"}   # Light gray
       - color: {index: 8, hex: "#57304A"}   # Magenta???
     images: automatic
+  - name: lightPalette
+    fixed-entries:
+      - color: {index: 0, hex: "#FAFAFA"}   # Background color
+      - color: {index: 1, hex: "#284261"}   # Primary blue
+      - color: {index: 2, hex: "#8A663C"}   # Primary tan
+      - color: {index: 3, hex: "#EF3C22"}   # Primary orange
+      - color: {index: 4, hex: "#A5A2A5"}
+      - color: {index: 5, hex: "#C3BFC3"}
+      - color: {index: 6, hex: "#868486"}
+      - color: {index: 7, hex: "#5A656B"}
+      - color: {index: 8, hex: "#57304A"}
+      - color: {index: 9, hex: "#000000"}
+      - color: {index: 10, hex: "#E3E4E6"}
+      - color: {index: 11, hex: "#BDBFC5"}
+      - color: {index: 12, hex: "#9E9CA0"}
+      - color: {index: 13, hex: "#8B8B93"}
+      - color: {index: 14, hex: "#83848e"}
+      - color: {index: 15, hex: "#969BA5"}
+      - color: {index: 16, hex: "#666B7C"}
+      - color: {index: 17, hex: "#606A7E"}
+      - color: {index: 18, hex: "#A39D9E"}
+      - color: {index: 19, hex: "#E9E6E4"}
+      - color: {index: 20, hex: "#AE9C9E"}
+      - color: {index: 21, hex: "#CFC5BF"}
+      - color: {index: 22, hex: "#9D918C"}
+      - color: {index: 23, hex: "#9B8C85"}
+      - color: {index: 24, hex: "#B7A699"}
+      - color: {index: 25, hex: "#F8E4E3"}
+      - color: {index: 26, hex: "#947C6A"}
+      - color: {index: 27, hex: "#9C8066"}
+      - color: {index: 28, hex: "#C28A8A"}
+      - color: {index: 29, hex: "#F5BFBD"}
+      - color: {index: 30, hex: "#C98382"}
+      - color: {index: 31, hex: "#F29995"}
+      - color: {index: 32, hex: "#DC6A64"}
+      - color: {index: 33, hex: "#F0685E"}
+    images: automatic
 
 converts:
   - name: sprites
@@ -28,5 +65,6 @@ outputs:
     include-file: gfx.h
     palettes:
       - darkPalette
+      - lightPalette
     converts:
       - sprites
