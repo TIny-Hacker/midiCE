@@ -6,7 +6,7 @@
  * Some code by Powerbyte7
  * Copyright 2023 - 2024
  * License: GPL-3.0
- * Last Build: October 22, 2024
+ * Last Build: November 26, 2024
  * Version: 1.0.0
  * 
  * --------------------------------------
@@ -22,8 +22,9 @@
 #include <string.h>
 #include <usbdrvce.h>
 #include <stdint.h>
-
+#include <stdlib.h>
 #include <time.h>
+#include <ti/info.h>
 
 static const usb_string_descriptor_t product_name = {
     .bLength = sizeof(product_name) + 12, // 12 includes length of .bString
@@ -37,10 +38,10 @@ static const usb_string_descriptor_t manufacturer = {
     .bString = L"TIny_Hacker",
 };
 
-static const usb_string_descriptor_t serial = {
-    .bLength = sizeof(manufacturer) + 2,
+static usb_string_descriptor_t serial = {
+    .bLength = sizeof(serial) + 32,
     .bDescriptorType = USB_STRING_DESCRIPTOR,
-    .bString = L"0",
+    .bString = L"0000000000000000",
 };
 
 static const usb_string_descriptor_t jack = {
@@ -246,6 +247,14 @@ int main(void) {
     uint8_t monoNote = 0;
 
     static uint16_t controllers[4] = {DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL};
+
+    const system_info_t *system = os_GetSystemInfo();
+
+    for (uint8_t i = 0; i < 16; i++) {
+        serial.bString[i] = 'A' + (system->calcid[i] >> 4);
+        i++;
+        serial.bString[i] = 'A' + (system->calcid[i] & 0xF);
+    };
 
     gfx_Begin();
     gfx_SetPalette(darkPalette, sizeof_darkPalette, 0);

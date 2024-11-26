@@ -71,12 +71,12 @@ void display_Settings(state_t state) {
 
     static char channel[3] = "00";
 
-    if (state.channel > MIDI_CHANNEL9) {
+    if (state.channel + 1 > MIDI_CHANNEL9) {
         channel[0] = '1';
-        channel[1] = state.channel - 10 + '0';
+        channel[1] = state.channel - 9 + '0';
     } else {
         channel[0] = '0';
-        channel[1] = state.channel + '0';
+        channel[1] = state.channel + 1 + '0';
     }
 
     asm_utils_PrintString(coordVRAMBuf(162, 90), channel);
