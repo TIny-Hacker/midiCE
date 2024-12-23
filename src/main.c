@@ -6,7 +6,7 @@
  * Some code by Powerbyte7
  * Copyright 2023 - 2024
  * License: GPL-3.0
- * Last Build: November 26, 2024
+ * Last Build: December 23, 2024
  * Version: 1.0.0
  * 
  * --------------------------------------
