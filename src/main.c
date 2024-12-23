@@ -340,7 +340,7 @@ int main(void) {
                         }
 
                         if (bit(midiEvent[2], 7)) { // Drumpad
-                            midiEvent[1] = midiEvent[1] | MIDI_CHANNEL9;
+                            midiEvent[1] = (midiEvent[1] & 0xF0) | MIDI_CHANNEL9;
                             midiEvent[2] &= DRUMPAD_MASK;
                         } else {
                             midiEvent[2] += state.octave + state.root; // Only octave / root shift notes, not drums.
