@@ -40,4 +40,4 @@ If you encounter a bug while using midiCE, don't hesitate to [make an issue](htt
 
 Thanks to [Powerbyte7](https://github.com/powerbyte7) and [commandblockguy](https://github.com/commandblockguy/) for help with this project!
 
-© 2023 - 2024 TIny_Hacker
+© 2023 - 2025 TIny_Hacker

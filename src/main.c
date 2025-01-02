@@ -4,9 +4,9 @@
  * midiCE Source Code - main.c
  * By TIny_Hacker
  * Some code by Powerbyte7
- * Copyright 2023 - 2024
+ * Copyright 2023 - 2025
  * License: GPL-3.0
- * Last Build: December 23, 2024
+ * Last Build: December 23, 2025
  * Version: 1.0.0
  * 
  * --------------------------------------

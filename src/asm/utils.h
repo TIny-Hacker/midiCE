@@ -3,7 +3,7 @@
  * 
  * midiCE Studio Source Code - utils.h
  * By TIny_Hacker
- * Copyright 2023 - 2024
+ * Copyright 2023 - 2025
  * License: GPL-3.0
  * 
  * --------------------------------------

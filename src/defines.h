@@ -4,7 +4,7 @@
  * midiCE Studio Source Code - defines.h
  * By TIny_Hacker
  * Some code by Powerbyte7
- * Copyright 2023 - 2024
+ * Copyright 2023 - 2025
  * License: GPL-3.0
  * 
  * --------------------------------------
