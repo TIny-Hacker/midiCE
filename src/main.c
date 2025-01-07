@@ -6,8 +6,8 @@
  * Some code by Powerbyte7
  * Copyright 2023 - 2025
  * License: GPL-3.0
- * Last Build: December 23, 2025
- * Version: 1.0.0
+ * Last Build: January 7, 2025
+ * Version: 1.0.1
  * 
  * --------------------------------------
 **/
@@ -416,7 +416,9 @@ int main(void) {
                 midiEvent[2] = low(state.pitchbend << 1) >> 1; // Split 16 bit number into two 7 bit numbers, since MIDI needs the most significant bit clear
                 midiEvent[3] = high(state.pitchbend << 1);
 
-                while (USB_SUCCESS != usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL));
+                while (!(kb_IsDown(kb_KeyClear) && !kb_Data[1] && !kb_Data[2] && !kb_Data[3] && !kb_Data[4] && !kb_Data[5]) && USB_SUCCESS != usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
+                    kb_Scan();
+                }
             }
 
             if (clock() - clockOffset > CLOCKS_PER_SEC / 20) {
