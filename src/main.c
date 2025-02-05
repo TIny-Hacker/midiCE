@@ -5,7 +5,7 @@
  * By TIny_Hacker
  * Some code by Powerbyte7
  * Copyright 2023 - 2025
- * License: GPL-3.0
+ * License: LGPL-3.0
  * Last Build: January 7, 2025
  * Version: 1.0.1
  * 

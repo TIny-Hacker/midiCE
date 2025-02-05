@@ -3,7 +3,7 @@
 ; midiCE Source Code - utils.asm
 ; By TIny_Hacker
 ; Copyright 2023 - 2025
-; License: GPL-3.0
+; License: LGPL-3.0
 ;
 ;--------------------------------------
 
