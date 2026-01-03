@@ -4,7 +4,7 @@
  * midiCE Studio Source Code - defines.h
  * By TIny_Hacker
  * Some code by Powerbyte7
- * Copyright 2023 - 2025
+ * Copyright 2023 - 2026
  * License: LGPL-3.0
  * 
  * --------------------------------------
@@ -71,6 +71,8 @@ extern "C" {
 #define CC17                17      /* CC17 MIDI controller. */
 #define CC18                18      /* CC18 MIDI controller.*/
 #define CC19                19      /* CC19 MIDI controller. */
+#define CC126               126     /* CC126 MIDI controller. */
+#define CC127               127     /* CC127 MIDI controller. */
 
 #define DEFAULT_CONTROL     8192    /* Default control value. */
 #define MAX_CONTROL         16383   /* Maximum control value. */

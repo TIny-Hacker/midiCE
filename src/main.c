@@ -4,7 +4,7 @@
  * midiCE Source Code - main.c
  * By TIny_Hacker
  * Some code by Powerbyte7
- * Copyright 2023 - 2025
+ * Copyright 2023 - 2026
  * License: LGPL-3.0
  * Last Build: January 7, 2025
  * Version: 1.0.1
@@ -244,8 +244,6 @@ int main(void) {
         {47 | DRUMPAD, 45 | DRUMPAD, 43 | DRUMPAD, 41 | DRUMPAD, 39 | DRUMPAD, 37 | DRUMPAD, 0, 0},
     };
 
-    uint8_t monoNote = 0;
-
     static uint16_t controllers[4] = {DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL, DEFAULT_CONTROL};
 
     const system_info_t *system = os_GetSystemInfo();
@@ -311,37 +309,21 @@ int main(void) {
                         usb_InterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, 5, NULL);
                     } else if (bit(kb_Data[i + 1], j) != bit(kbBackup[i], j) && notes[i][j]) { // kb_Data is not zero indexed bc the first two bytes are empty
                         if (bit(kb_Data[i + 1], j)) { // Key was just pressed
-                            if (state.voice == VOICE_MONO && monoNote) {
-                                midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_OFF;
-                                midiEvent[1] = MIDI_NOTE_OFF << 4 | state.channel;
-                                midiEvent[2] = monoNote;
-                                kbBackup[i] = toggle(kbBackup[i], j); // This key is still held, so make sure it'll get flipped back again
-                                monoNote = 0;
-                            } else {
-                                midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
-                                midiEvent[1] = MIDI_NOTE_ON << 4 | state.channel;
-                                midiEvent[2] = notes[i][j];
-                                monoNote = notes[i][j];
-                            }
+                            midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_ON;
+                            midiEvent[1] = MIDI_NOTE_ON << 4 | state.channel;
                         } else if (notes[i][j]) {
                             if (kb_IsDown(kb_KeyVars)) {
                                 continue;
                             }
 
-                            if (state.voice == VOICE_MONO && monoNote != notes[i][j]) {
-                                kbBackup[i] = toggle(kbBackup[i], j); // Key is still released, we just don't need to send an off event
-                                continue;
-                            }
-
                             midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_NOTE_OFF;
                             midiEvent[1] = MIDI_NOTE_OFF << 4 | state.channel;
-                            midiEvent[2] = notes[i][j];
-                            monoNote = 0;
                         }
 
-                        if (bit(midiEvent[2], 7)) { // Drumpad
+                        midiEvent[2] = notes[i][j] & DRUMPAD_MASK;
+
+                        if (bit(notes[i][j], 7)) { // Drumpad
                             midiEvent[1] = (midiEvent[1] & 0xF0) | MIDI_CHANNEL9;
-                            midiEvent[2] &= DRUMPAD_MASK;
                         } else {
                             midiEvent[2] += state.octave + state.root; // Only octave / root shift notes, not drums.
                         }

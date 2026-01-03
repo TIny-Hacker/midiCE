@@ -3,7 +3,7 @@
  * 
  * midiCE Studio Source Code - settings.c
  * By TIny_Hacker
- * Copyright 2023 - 2025
+ * Copyright 2023 - 2026
  * License: LGPL-3.0
  * 
  * --------------------------------------
@@ -159,6 +159,15 @@ void settings_Open(state_t *state) {
                     case 3:
                         if (kb_IsDown(kb_KeyLeft) || kb_IsDown(kb_KeyRight)) {
                             state->voice = !state->voice;
+                            uint8_t midiEvent[4];
+                            midiEvent[0] = MIDI_CABLE0 << 4 | MIDI_CONTROL_CHANGE;
+                            midiEvent[1] = MIDI_CONTROL_CHANGE << 4 | state->channel;
+                            midiEvent[2] = CC126 + state->voice == VOICE_POLY;
+                            midiEvent[3] = 1;
+
+                            while (!(kb_IsDown(kb_KeyClear) && !kb_Data[1] && !kb_Data[2] && !kb_Data[3] && !kb_Data[4] && !kb_Data[5]) && USB_SUCCESS != usb_ScheduleInterruptTransfer(usb_GetDeviceEndpoint(usb_FindDevice(NULL, NULL, USB_SKIP_HUBS), USB_DEVICE_TO_HOST | 1), &midiEvent, 4, NULL, NULL)) {
+                                kb_Scan();
+                            }
                         }
 
                         display_Settings(*state);
