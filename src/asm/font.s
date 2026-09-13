@@ -1,6 +1,6 @@
 ;--------------------------------------
 ;
-; midiCE Source Code - font.asm
+; midiCE Source Code - font.s
 ; By TIny_Hacker
 ; Copyright 2023 - 2026
 ; License: LGPL-3.0
@@ -9,6 +9,8 @@
 
 ; Each entry is 9 bytes. The first byte is the character width
 ; and the remaining 8 are the character data.
+
+    .section .rodata
 
 _fontData:
     ; db 4, $80, $E0, $96, $00, $00, $00, $00, $00 ; ','

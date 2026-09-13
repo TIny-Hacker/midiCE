@@ -1,20 +1,24 @@
 ;--------------------------------------
 ;
-; midiCE Source Code - utils.asm
+; midiCE Source Code - utils.s
 ; By TIny_Hacker
 ; Copyright 2023 - 2026
 ; License: LGPL-3.0
 ;
 ;--------------------------------------
 
-    assume adl=1
+    .assume adl=1
 
-    section .text
+    .include "src/asm/include/ti84pceg.inc"
 
-    public _asm_utils_PrintString
-    public _textColor
+    .global _asm_utils_PrintString
+    .type   _asm_utils_PrintString, @function
+    .global _textColor
+    .type   _textColor, @function
 
-include 'include/ti84pceg.inc'
+;--------------------------------------
+
+    .section .text
 
 _asm_utils_PrintString:
     pop bc
@@ -49,7 +53,7 @@ _asm_utils_PrintString:
     add a, a
     jr nc, .skipLoad
     ld (hl), $FF
-_textColor := $ - 1
+.equ _textColor, $ - 1
 
 .skipLoad:
     inc hl
@@ -66,4 +70,4 @@ _textColor := $ - 1
     inc hl
     jr .getChar
 
-include 'font.asm'
+    .include "src/asm/font.s"

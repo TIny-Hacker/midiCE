@@ -16,6 +16,7 @@
 
 #include <keypadc.h>
 #include <time.h>
+#include <usbdrvce.h>
 
 static void settings_UpdateSelect(uint8_t option) {
     switch (option) {
