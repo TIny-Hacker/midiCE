@@ -9,9 +9,10 @@
  * --------------------------------------
 **/
 
-#include "asm/utils.h"
 #include "defines.h"
 #include "display.h"
+
+#include "asm/utils.h"
 #include "gfx/gfx.h"
 
 #include <keypadc.h>

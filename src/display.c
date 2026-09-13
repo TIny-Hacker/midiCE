@@ -9,8 +9,9 @@
  * --------------------------------------
 **/
 
-#include "asm/utils.h"
 #include "defines.h"
+
+#include "asm/utils.h"
 #include "gfx/gfx.h"
 
 #include <graphx.h>
